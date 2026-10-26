@@ -1,0 +1,13 @@
+{% macro badge(status) %}
+<span class="badge badge-{{ status | lower | replace(' ', '-') }}">{{ status }}</span>
+{% endmacro %}
+
+{% macro pager(endpoint, paging, params) %}
+{% if paging.pages > 1 %}
+<nav class="pager" aria-label="Pages">
+  {% if paging.page > 1 %}<a href="{{ url_for(endpoint, page=paging.page - 1, **params) }}">Previous</a>{% endif %}
+  <span>Page {{ paging.page }} of {{ paging.pages }} ({{ paging.total }} requests)</span>
+  {% if paging.page < paging.pages %}<a href="{{ url_for(endpoint, page=paging.page + 1, **params) }}">Next</a>{% endif %}
+</nav>
+{% endif %}
+{% endmacro %}

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>Tell your county what needs fixing.</h1>
+  <p class="lead">Report a broken streetlight, a water problem or uncollected garbage. Follow the request until it is resolved.</p>
+  <p><a class="btn" href="{{ url_for('register') }}">Create an account</a>
+     <a class="btn btn-ghost" href="{{ url_for('login') }}">Log in</a></p>
+</section>
+<section class="steps">
+  <div><h3>Describe it</h3><p>Pick a category, say where it is and add a photo if you have one.</p></div>
+  <div><h3>We triage it</h3><p>An administrator reviews the request and moves it to In Progress.</p></div>
+  <div><h3>You see the outcome</h3><p>Every status change is recorded on your request, with a note.</p></div>
+</section>
+{% endblock %}

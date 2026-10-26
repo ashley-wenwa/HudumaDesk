@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge %}
+{% block title %}Request #{{ req.id }} - Huduma Desk{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+{% endblock %}
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="{{ url_for('static', filename='map.js') }}"></script>
+{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1>Request #{{ req.id }} {{ badge(req.status) }}</h1>
+  <a href="{{ url_for('dashboard' if g.user.role == 'admin' else 'my_requests') }}">Back to list</a>
+</div>
+
+<div class="grid-2">
+  <section class="card">
+    <dl>
+      <dt>Category</dt><dd>{{ req.category }}</dd>
+      <dt>Location</dt><dd>{{ req.location }}</dd>
+      <dt>Description</dt><dd>{{ req.description }}</dd>
+      {% if g.user.role == 'admin' %}<dt>Reported by</dt><dd>{{ req.full_name }} ({{ req.email }})</dd>{% endif %}
+      <dt>Submitted</dt><dd>{{ req.created_at }} UTC</dd>
+    </dl>
+    {% if req.latitude is not none %}
+      <div id="map" data-mode="view" data-lat="{{ req.latitude }}" data-lng="{{ req.longitude }}"></div>
+      <p class="small"><a href="https://www.openstreetmap.org/?mlat={{ req.latitude }}&amp;mlon={{ req.longitude }}#map=17/{{ req.latitude }}/{{ req.longitude }}">Open in OpenStreetMap</a></p>
+    {% endif %}
+    {% if req.image_filename %}
+      <img class="evidence" src="{{ url_for('uploaded_file', filename=req.image_filename) }}" alt="Photo attached to request #{{ req.id }}">
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Progress</h2>
+    <ol class="timeline">
+      {% for h in history %}
+        <li><strong>{{ h.status }}</strong> <span class="muted">{{ h.changed_at }} UTC</span>
+          {% if h.note %}<br>{{ h.note }}{% endif %}</li>
+      {% endfor %}
+    </ol>
+
+    {% if g.user.role == 'admin' %}
+    <h2>Update status</h2>
+    <form method="post" action="{{ url_for('update_status', request_id=req.id) }}">
+      {{ csrf_field() }}
+      <label for="status">Status</label>
+      <select id="status" name="status">
+        {% for s in STATUSES %}<option {{ 'selected' if s == req.status }}>{{ s }}</option>{% endfor %}
+      </select>
+      <label for="note">Note to the citizen <span class="muted">(optional)</span></label>
+      <textarea id="note" name="note" rows="3"></textarea>
+      <button class="btn" type="submit">Save status</button>
+    </form>
+    {% endif %}
+  </section>
+</div>
+{% endblock %}

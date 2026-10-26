@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Report a problem - Huduma Desk{% endblock %}
+{% block head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+{% endblock %}
+{% block scripts %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script src="{{ url_for('static', filename='map.js') }}"></script>
+{% endblock %}
+{% block content %}
+<section class="card narrow">
+  <h1>Report a problem</h1>
+  <form method="post" enctype="multipart/form-data">
+    {{ csrf_field() }}
+    <label for="category">Category</label>
+    <select id="category" name="category" required>
+      <option value="" disabled {{ 'selected' if not form.category }}>Choose a category</option>
+      {% for c in CATEGORIES %}<option {{ 'selected' if form.category == c }}>{{ c }}</option>{% endfor %}
+    </select>
+    <label for="location">Location</label>
+    <input id="location" name="location" value="{{ form.location }}" placeholder="Street, estate or nearest landmark" required>
+    <label>Pin it on the map <span class="muted">(optional)</span></label>
+    <div id="map" data-mode="pick" data-lat="{{ form.latitude }}" data-lng="{{ form.longitude }}"></div>
+    <input type="hidden" id="latitude" name="latitude" value="{{ form.latitude }}">
+    <input type="hidden" id="longitude" name="longitude" value="{{ form.longitude }}">
+    <button class="btn btn-small btn-ghost" type="button" id="locate">Use my current location</button>
+    <label for="description">What is the problem?</label>
+    <textarea id="description" name="description" rows="5" minlength="10" required>{{ form.description }}</textarea>
+    <label for="image">Photo <span class="muted">(optional, up to 4 MB)</span></label>
+    <input id="image" name="image" type="file" accept="image/png,image/jpeg,image/gif,image/webp">
+    <button class="btn" type="submit">Submit request</button>
+  </form>
+</section>
+{% endblock %}

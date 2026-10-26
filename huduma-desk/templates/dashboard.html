@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% from "_macros.html" import badge, pager %}
+{% block title %}Dashboard - Huduma Desk{% endblock %}
+{% block content %}
+<h1>Dashboard</h1>
+
+<section class="stats" aria-label="Summary">
+  <div class="card stat"><span class="num">{{ stats.total }}</span>Total requests</div>
+  <div class="card stat"><span class="num">{{ stats.open }}</span>Open</div>
+  <div class="card stat"><span class="num">{{ stats.resolved }}</span>Resolved</div>
+  <div class="card stat"><span class="num">{{ stats.resolution_rate }}%</span>Resolution rate</div>
+</section>
+
+<div class="grid-2">
+  <section class="card">
+    <h2>Open and resolved</h2>
+    {% for s in STATUSES %}
+      {% set n = stats.by_status[s] %}
+      <div class="bar-row">
+        <span>{{ s }}</span>
+        <div class="bar"><div class="fill fill-{{ s | lower | replace(' ', '-') }}"
+             style="width: {{ (100 * n / stats.total) if stats.total else 0 }}%"></div></div>
+        <span class="count">{{ n }}</span>
+      </div>
+    {% endfor %}
+  </section>
+  <section class="card">
+    <h2>By category</h2>
+    {% for c in stats.by_category %}
+      <div class="bar-row">
+        <span>{{ c.category }}</span>
+        <div class="bar"><div class="fill fill-resolved" style="width: {{ 100 * c.n / stats.total }}%"></div></div>
+        <span class="count">{{ c.resolved }}/{{ c.n }}</span>
+      </div>
+    {% else %}<p class="muted">No requests yet.</p>{% endfor %}
+    <p class="muted small">Resolved out of total, per category.</p>
+  </section>
+</div>
+
+<h2>All requests</h2>
+<form class="filters" method="get">
+  <input name="q" value="{{ filters.q }}" placeholder="Search location or description" aria-label="Search">
+  <select name="status" aria-label="Status">
+    <option value="">Any status</option>
+    {% for s in STATUSES %}<option {{ 'selected' if filters.status == s }}>{{ s }}</option>{% endfor %}
+  </select>
+  <select name="category" aria-label="Category">
+    <option value="">Any category</option>
+    {% for c in CATEGORIES %}<option {{ 'selected' if filters.category == c }}>{{ c }}</option>{% endfor %}
+  </select>
+  <button class="btn btn-small" type="submit">Filter</button>
+  <a href="{{ url_for('dashboard') }}">Clear</a>
+  <a class="btn btn-small btn-ghost" href="{{ url_for('export_csv', **filters) }}">Export CSV</a>
+</form>
+
+{% if requests %}
+<div class="table-wrap"><table>
+  <thead><tr><th>No.</th><th>Category</th><th>Location</th><th>Citizen</th><th>Status</th><th>Submitted</th></tr></thead>
+  <tbody>
+  {% for r in requests %}
+    <tr>
+      <td><a href="{{ url_for('request_detail', request_id=r.id) }}">#{{ r.id }}</a></td>
+      <td>{{ r.category }}</td><td>{{ r.location }}</td><td>{{ r.full_name }}</td>
+      <td>{{ badge(r.status) }}</td><td>{{ r.created_at[:10] }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table></div>
+{{ pager('dashboard', paging, filters) }}
+{% else %}
+<div class="card empty"><p>No requests match these filters.</p></div>
+{% endif %}
+{% endblock %}

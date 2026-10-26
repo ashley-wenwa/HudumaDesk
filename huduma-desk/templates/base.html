@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Huduma Desk{% endblock %}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;700&display=swap">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <header class="site-header">
+    <div class="container bar">
+      <a class="brand" href="{{ url_for('index') }}">Huduma Desk</a>
+      <nav>
+        {% if g.user %}
+          {% if g.user.role == 'admin' %}
+            <a href="{{ url_for('dashboard') }}">Dashboard</a>
+          {% else %}
+            <a href="{{ url_for('my_requests') }}">My requests</a>
+            <a href="{{ url_for('submit_request') }}">Report a problem</a>
+          {% endif %}
+          <form method="post" action="{{ url_for('logout') }}" class="inline">
+            {{ csrf_field() }}<button class="link" type="submit">Log out ({{ g.user.full_name.split()[0] }})</button>
+          </form>
+        {% else %}
+          <a href="{{ url_for('login') }}">Log in</a>
+          <a class="btn btn-small" href="{{ url_for('register') }}">Create account</a>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <main class="container">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="flash flash-{{ category }}" role="alert">{{ message }}</div>
+      {% endfor %}
+    {% endwith %}
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="container site-footer">Huduma Desk is a demo project and is not an official government service.</footer>
+  {% block scripts %}{% endblock %}
+</body>
+</html>
